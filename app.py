@@ -11,6 +11,85 @@ st.set_page_config(
     layout="centered"
 )
 
+# Estrellitas animadas con canvas + fondo degradado
+st.components.v1.html(
+    '''
+    <style>
+      #starCanvas {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        z-index: 0;
+        pointer-events: none;
+      }
+    </style>
+    <canvas id="starCanvas"></canvas>
+    <script>
+      const canvas = document.getElementById("starCanvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const stars = Array.from({length: 80}, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 3 + 1,
+        dx: (Math.random() - 0.5) * 0.6,
+        dy: (Math.random() - 0.5) * 0.6,
+        alpha: Math.random(),
+        dAlpha: (Math.random() - 0.5) * 0.02,
+        color: ["#ffb3c6","#ffd6a5","#caffbf","#a0c4ff","#ffc6ff","#fdffb6"][Math.floor(Math.random()*6)]
+      }));
+
+      function drawStar(x, y, r, alpha, color) {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0.2, Math.min(1, alpha));
+        ctx.fillStyle = color;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        for (let i = 0; i < 5; i++) {
+          const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+          const outerX = x + r * Math.cos(angle);
+          const outerY = y + r * Math.sin(angle);
+          const innerAngle = angle + (2 * Math.PI) / 10;
+          const innerX = x + (r * 0.4) * Math.cos(innerAngle);
+          const innerY = y + (r * 0.4) * Math.sin(innerAngle);
+          if (i === 0) ctx.moveTo(outerX, outerY);
+          else ctx.lineTo(outerX, outerY);
+          ctx.lineTo(innerX, innerY);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        stars.forEach(s => {
+          s.x += s.dx;
+          s.y += s.dy;
+          s.alpha += s.dAlpha;
+          if (s.alpha <= 0.1 || s.alpha >= 1) s.dAlpha *= -1;
+          if (s.x < 0) s.x = canvas.width;
+          if (s.x > canvas.width) s.x = 0;
+          if (s.y < 0) s.y = canvas.height;
+          if (s.y > canvas.height) s.y = 0;
+          drawStar(s.x, s.y, s.r * 4, s.alpha, s.color);
+        });
+        requestAnimationFrame(animate);
+      }
+      animate();
+
+      window.addEventListener("resize", () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+    </script>
+    ''',
+    height=0
+)
+
 st.markdown(
     '''
 <style>
@@ -158,13 +237,6 @@ hr { border: none; border-top: 2px dashed rgba(0,0,0,0.12) !important; margin: 1
     color: #888 !important;
     margin-top: 30px;
     padding-bottom: 20px;
-}
-
-.banner-img {
-    width: 100%;
-    border-radius: 20px;
-    margin-bottom: 16px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
 }
 </style>
     ''',
