@@ -7,187 +7,115 @@ import io
 
 # ── Configuración de página ──────────────────────────────────────────────────
 st.set_page_config(
-    page_title="🐾 Mis Mascotas",
+    page_title="🐾 Coco & Canela",
     page_icon="🐾",
     layout="centered"
 )
 
-# ── Estilos visuales ─────────────────────────────────────────────────────────
+# ── CSS: fondo animado + todos los textos legibles ────────────────────────────
 st.markdown("""
 <style>
-    .main { background-color: #fff8f0; }
-    .titulo { text-align: center; font-size: 2.5rem; color: #c0392b; }
-    .subtitulo { text-align: center; color: #888; font-size: 1rem; }
-    .tarjeta {
-        background: white;
-        border-radius: 16px;
-        padding: 20px;
-        margin: 10px 0;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        text-align: center;
-    }
-    .estado-pill {
-        display: inline-block;
-        padding: 6px 18px;
-        border-radius: 20px;
-        font-weight: bold;
-        font-size: 1.1rem;
-    }
-</style>
-""", unsafe_allow_html=True)
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Pacifico&display=swap');
 
-# ── Encabezado ────────────────────────────────────────────────────────────────
-st.markdown('<p class="titulo">🐾 Comedero de Coco y Canela</p>', unsafe_allow_html=True)
-st.markdown('<p class="subtitulo">Controla la alimentación de tus mininos desde donde estés 🏠</p>', unsafe_allow_html=True)
-st.markdown("---")
+/* Fondo animado con gradiente que se mueve */
+[data-testid="stAppViewContainer"] {
+    background: linear-gradient(-45deg, #f8b4c8, #ffd6a5, #fdffb6, #caffbf, #a0c4ff, #ffc6ff);
+    background-size: 400% 400%;
+    animation: gradientFlow 12s ease infinite;
+    font-family: 'Nunito', sans-serif;
+}
 
-# ── MQTT ─────────────────────────────────────────────────────────────────────
-BROKER_IP   = "157.230.214.127"
-PORT        = 1883
-TOPIC       = "cmqtt_sdesi"
-CLIENT_ID   = "app_usuario_mascotas_01"
+@keyframes gradientFlow {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
 
-@st.cache_resource
-def conectar_mqtt():
-    cliente = mqtt.Client(CLIENT_ID)
-    try:
-        cliente.connect(BROKER_IP, PORT, 60)
-        cliente.loop_start()
-    except Exception as e:
-        st.error(f"⚠️ No se pudo conectar al broker MQTT: {e}")
-    return cliente
+/* Quitar fondo del header de Streamlit */
+[data-testid="stHeader"] { background: transparent !important; }
+[data-testid="stToolbar"] { display: none; }
 
-client = conectar_mqtt()
+/* Todos los textos en oscuro para legibilidad */
+* { color: #2d2d2d !important; }
 
-def enviar_comando(pantalla: str, motor: str):
-    payload = json.dumps({"Pantalla": pantalla, "Act1": motor})
-    try:
-        client.publish(TOPIC, payload, qos=1)
-        return True
-    except Exception as e:
-        st.error(f"Error enviando comando: {e}")
-        return False
+/* Tarjetas blancas con sombra suave */
+.tarjeta {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 22px 28px;
+    margin: 12px 0;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.10);
+    text-align: center;
+    border: 1.5px solid rgba(255,255,255,0.9);
+}
 
-# ── Estado de sesión ──────────────────────────────────────────────────────────
-if "motor_actual" not in st.session_state:
-    st.session_state.motor_actual = "NADIE"
-if "ultimo_evento" not in st.session_state:
-    st.session_state.ultimo_evento = "Sin actividad reciente"
+/* Título principal */
+.titulo-principal {
+    font-family: 'Pacifico', cursive;
+    font-size: 2.6rem;
+    text-align: center;
+    color: #c0392b !important;
+    text-shadow: 2px 3px 0px rgba(255,255,255,0.6);
+    margin-bottom: 4px;
+}
 
-# ── Cámara en vivo ────────────────────────────────────────────────────────────
-st.markdown("### 📷 Cámara en vivo")
-st.markdown(
-    '<div class="tarjeta">Activa la cámara para ver a tus mininos 🐱</div>',
-    unsafe_allow_html=True
-)
-camara = st.camera_input("Ver a mis mascotas")
-if camara:
-    st.image(camara, caption="📸 Vista en vivo", use_container_width=True)
+.subtitulo {
+    text-align: center;
+    font-size: 1.05rem;
+    color: #555 !important;
+    margin-bottom: 20px;
+}
 
-st.markdown("---")
+/* Pastillas de estado */
+.pill {
+    display: inline-block;
+    padding: 8px 22px;
+    border-radius: 30px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+    color: white !important;
+}
+.pill-coco    { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+.pill-canela  { background: linear-gradient(135deg, #e67e22, #f39c12); }
+.pill-nadie   { background: linear-gradient(135deg, #95a5a6, #bdc3c7); }
 
-# ── Estado actual ─────────────────────────────────────────────────────────────
-st.markdown("### 🔔 Estado del comedero")
-color_map = {"GATO_A": "#27ae60", "GATO_B": "#e67e22", "NADIE": "#95a5a6"}
-label_map = {"GATO_A": "🟢 Plato de Coco abierto",
-             "GATO_B": "🟠 Plato de Canela abierto",
-             "NADIE":  "⚪ Comederos cerrados"}
-color  = color_map[st.session_state.motor_actual]
-etiq   = label_map[st.session_state.motor_actual]
+.evento-texto {
+    font-size: 0.85rem;
+    color: #666 !important;
+    margin-top: 4px;
+}
 
-st.markdown(
-    f'<div class="tarjeta">'
-    f'<span class="estado-pill" style="background:{color};color:white">{etiq}</span>'
-    f'<br><small style="color:#aaa">Último evento: {st.session_state.ultimo_evento}</small>'
-    f'</div>',
-    unsafe_allow_html=True
-)
+/* Botones de Streamlit más bonitos */
+[data-testid="stButton"] > button {
+    border-radius: 14px !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 1rem !important;
+    padding: 10px 8px !important;
+    border: none !important;
+    transition: transform 0.15s, box-shadow 0.15s !important;
+    color: white !important;
+}
+[data-testid="stButton"] > button:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.18) !important;
+}
 
-st.markdown("---")
+/* Colores individuales por posición */
+[data-testid="column"]:nth-child(1) button { background: linear-gradient(135deg,#27ae60,#2ecc71) !important; }
+[data-testid="column"]:nth-child(2) button { background: linear-gradient(135deg,#e67e22,#f39c12) !important; }
+[data-testid="column"]:nth-child(3) button { background: linear-gradient(135deg,#95a5a6,#636e72) !important; }
 
-# ── Botones manuales ──────────────────────────────────────────────────────────
-st.markdown("### 🍽️ Control manual")
-col1, col2, col3 = st.columns(3)
+/* Secciones con título */
+.seccion-titulo {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #2d2d2d !important;
+    margin: 18px 0 6px 0;
+}
 
-with col1:
-    if st.button("🐱 Abrir Coco", use_container_width=True):
-        if enviar_comando("Coco", "GATO_A"):
-            st.session_state.motor_actual = "GATO_A"
-            st.session_state.ultimo_evento = "Botón: plato de Coco"
-            st.success("¡Plato de Coco abierto! 🟢")
-            st.rerun()
-
-with col2:
-    if st.button("🐱 Abrir Canela", use_container_width=True):
-        if enviar_comando("Canela", "GATO_B"):
-            st.session_state.motor_actual = "GATO_B"
-            st.session_state.ultimo_evento = "Botón: plato de Canela"
-            st.success("¡Plato de Canela abierto! 🟠")
-            st.rerun()
-
-with col3:
-    if st.button("🔒 Cerrar todo", use_container_width=True):
-        if enviar_comando("Nadie", "NADIE"):
-            st.session_state.motor_actual = "NADIE"
-            st.session_state.ultimo_evento = "Botón: cerrar comederos"
-            st.warning("Comederos cerrados ⚪")
-            st.rerun()
-
-st.markdown("---")
-
-# ── Control por voz ───────────────────────────────────────────────────────────
-st.markdown("### 🎙️ Hablarle a mis mininos / Comando de voz")
-st.write("Di: *'abrir coco'*, *'abrir canela'* o *'cerrar'*")
-
-audio = mic_recorder(
-    start_prompt="🎤 Hablar",
-    stop_prompt="🟥 Detener",
-    just_once=True,
-    format="wav",
-    key="voz_usuario"
-)
-
-if audio:
-    recognizer = sr.Recognizer()
-    try:
-        with sr.AudioFile(io.BytesIO(audio["bytes"])) as source:
-            audio_data = recognizer.record(source)
-            texto = recognizer.recognize_google(audio_data, language="es-ES")
-            st.info(f"🗣️ Escuché: *\"{texto}\"*")
-            cmd = texto.lower()
-
-            if "coco" in cmd:
-                enviar_comando("Coco", "GATO_A")
-                st.session_state.motor_actual = "GATO_A"
-                st.session_state.ultimo_evento = "Voz: Coco"
-                st.success("¡Voz aceptada! Abriendo plato de Coco 🐱")
-                st.rerun()
-
-            elif "canela" in cmd:
-                enviar_comando("Canela", "GATO_B")
-                st.session_state.motor_actual = "GATO_B"
-                st.session_state.ultimo_evento = "Voz: Canela"
-                st.success("¡Voz aceptada! Abriendo plato de Canela 🐱")
-                st.rerun()
-
-            elif any(p in cmd for p in ["cerrar", "cierra", "nadie", "quitar"]):
-                enviar_comando("Nadie", "NADIE")
-                st.session_state.motor_actual = "NADIE"
-                st.session_state.ultimo_evento = "Voz: cerrar"
-                st.warning("Comederos cerrados por voz ⚪")
-                st.rerun()
-
-            else:
-                st.warning("No reconocí ese comando. Intenta con 'Coco', 'Canela' o 'Cerrar'.")
-
-    except sr.UnknownValueError:
-        st.error("No pude entender el audio. ¿Puedes repetirlo?")
-    except sr.RequestError as e:
-        st.error(f"Error con el servicio de voz: {e}")
-
-# ── Pie de página ─────────────────────────────────────────────────────────────
-st.markdown("---")
-st.markdown(
-    '<p style="text-align:center;color:#ccc;font-size:0.8rem">🐾 Hecho con amor para Coco y Canela</p>',
-    unsafe_allow_html=True
-)
+/* Alerts de Streamlit: forzar texto oscuro */
+[data-testid="stAlert"] p,
+[data-tes
