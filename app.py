@@ -34,6 +34,11 @@ st.markdown(
 
 * { color: #2d2d2d !important; }
 
+button, button * {
+    color: white !important;
+    -webkit-text-fill-color: white !important;
+}
+
 .stars-container {
     position: fixed;
     top: 0; left: 0;
@@ -122,6 +127,7 @@ st.markdown(
     transition: transform 0.15s, box-shadow 0.15s !important;
     color: white !important;
     -webkit-text-fill-color: white !important;
+    background: linear-gradient(135deg, #a78bfa, #818cf8) !important;
 }
 [data-testid="stButton"] > button:hover {
     transform: translateY(-3px) !important;
@@ -129,9 +135,11 @@ st.markdown(
     color: white !important;
     -webkit-text-fill-color: white !important;
 }
+[data-testid="stButton"] > button *,
 [data-testid="stButton"] > button p,
 [data-testid="stButton"] > button span,
-[data-testid="stButton"] > button div {
+[data-testid="stButton"] > button div,
+[data-testid="stButton"] > button label {
     color: white !important;
     -webkit-text-fill-color: white !important;
 }
@@ -263,7 +271,7 @@ if "ultimo_evento" not in st.session_state:
 if "mostrar_camara" not in st.session_state:
     st.session_state.mostrar_camara = False
 
-# ── SECCION CAMARA / VIDEO ────────────────────────────────────────────────────
+# Seccion camara / video
 st.markdown('<p class="seccion-titulo">📷 Vista del comedero</p>', unsafe_allow_html=True)
 
 col_vid, col_cam = st.columns([3, 1])
@@ -275,7 +283,6 @@ with col_vid:
         '</div>',
         unsafe_allow_html=True
     )
-    # Video en loop — sube "gatos.mp4" a tu repo con este nombre
     st.markdown(
         '''
         <div class="video-demo">
@@ -290,8 +297,9 @@ with col_vid:
     )
 
 with col_cam:
-    st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("📸 Abrir\ncamara", use_container_width=True):
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    label_cam = "📸 Cerrar\ncamara" if st.session_state.mostrar_camara else "📸 Abrir\ncamara"
+    if st.button(label_cam, use_container_width=True):
         st.session_state.mostrar_camara = not st.session_state.mostrar_camara
         st.rerun()
 
