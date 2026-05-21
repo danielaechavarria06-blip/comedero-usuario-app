@@ -88,7 +88,6 @@ st.markdown(
     margin: 18px 0 6px 0;
 }
 
-/* ---- BOTONES ---- */
 [data-testid="stButton"] > button {
     border-radius: 14px !important;
     font-family: "Nunito", sans-serif !important;
@@ -126,7 +125,6 @@ st.markdown(
     box-shadow: 0 4px 14px rgba(231,76,60,0.4) !important;
 }
 
-/* ---- ALERTS ---- */
 [data-testid="stAlert"] p,
 [data-testid="stAlert"] div,
 [data-testid="stAlert"] span {
@@ -134,13 +132,11 @@ st.markdown(
     -webkit-text-fill-color: #2d2d2d !important;
 }
 
-/* ---- CAMARA ---- */
 [data-testid="stCameraInput"] label {
     color: #2d2d2d !important;
     font-weight: 600;
 }
 
-/* ---- TARJETA VOZ ---- */
 .tarjeta-voz {
     background: linear-gradient(135deg, rgba(160,196,255,0.5), rgba(255,198,255,0.5));
     backdrop-filter: blur(10px);
@@ -163,10 +159,20 @@ hr { border: none; border-top: 2px dashed rgba(0,0,0,0.12) !important; margin: 1
     margin-top: 30px;
     padding-bottom: 20px;
 }
+
+.banner-img {
+    width: 100%;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
 </style>
     ''',
     unsafe_allow_html=True
 )
+
+# Banner portada
+st.image("banner.png", use_container_width=True)
 
 # Encabezado
 st.markdown('<p class="titulo-principal">🐾 Coco & Canela</p>', unsafe_allow_html=True)
