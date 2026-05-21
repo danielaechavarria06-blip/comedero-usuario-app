@@ -34,7 +34,6 @@ st.markdown(
 
 * { color: #2d2d2d !important; }
 
-/* Estrellitas CSS puras - no dependen de canvas ni iframe */
 .stars-container {
     position: fixed;
     top: 0; left: 0;
@@ -57,11 +56,6 @@ st.markdown(
     10%  { opacity: 1; }
     90%  { opacity: 0.8; }
     100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
-}
-
-@keyframes twinkle {
-    0%, 100% { opacity: 0.2; transform: scale(0.8); }
-    50%       { opacity: 1;   transform: scale(1.3); }
 }
 
 .tarjeta {
@@ -180,6 +174,13 @@ st.markdown(
     font-weight: 700;
 }
 
+.video-demo {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+    margin: 10px 0;
+}
+
 hr { border: none; border-top: 2px dashed rgba(0,0,0,0.12) !important; margin: 18px 0; }
 
 .footer {
@@ -194,28 +195,23 @@ hr { border: none; border-top: 2px dashed rgba(0,0,0,0.12) !important; margin: 1
     unsafe_allow_html=True
 )
 
-# Estrellitas con CSS puro - 60 divs con posiciones y tiempos aleatorios
+# Estrellitas CSS puras
 import random
 colors = ["#ffb3c6","#ffd6a5","#caffbf","#a0c4ff","#ffc6ff","#fdffb6","#ff9999","#b5ead7"]
 stars_html = '<div class="stars-container">'
 for i in range(60):
-    left    = random.randint(0, 100)
-    size    = random.randint(4, 10)
-    delay   = round(random.uniform(0, 12), 2)
-    duration= round(random.uniform(6, 16), 2)
-    color   = random.choice(colors)
-    # Alterna entre estrellita redonda y con forma de diamante
-    shape = "50%" if i % 3 != 0 else "0%"
+    left     = random.randint(0, 100)
+    size     = random.randint(4, 10)
+    delay    = round(random.uniform(0, 12), 2)
+    duration = round(random.uniform(6, 16), 2)
+    color    = random.choice(colors)
+    shape    = "50%" if i % 3 != 0 else "0%"
     stars_html += (
         f'<div class="star" style="'
-        f'left:{left}%;'
-        f'width:{size}px;height:{size}px;'
-        f'background:{color};'
-        f'border-radius:{shape};'
-        f'animation-duration:{duration}s;'
-        f'animation-delay:{delay}s;'
-        f'box-shadow: 0 0 {size*2}px {color};'
-        f'"></div>'
+        f'left:{left}%;width:{size}px;height:{size}px;'
+        f'background:{color};border-radius:{shape};'
+        f'animation-duration:{duration}s;animation-delay:{delay}s;'
+        f'box-shadow:0 0 {size*2}px {color};"></div>'
     )
 stars_html += '</div>'
 st.markdown(stars_html, unsafe_allow_html=True)
@@ -264,13 +260,45 @@ if "motor_actual" not in st.session_state:
     st.session_state.motor_actual = "NADIE"
 if "ultimo_evento" not in st.session_state:
     st.session_state.ultimo_evento = "Sin actividad reciente"
+if "mostrar_camara" not in st.session_state:
+    st.session_state.mostrar_camara = False
 
-# Camara en vivo
-st.markdown('<p class="seccion-titulo">📷 Camara en vivo</p>', unsafe_allow_html=True)
-st.markdown('<div class="tarjeta">👀 Activa la camara para ver a tus mininos en tiempo real 🐱</div>', unsafe_allow_html=True)
-camara = st.camera_input("Captura una foto de tus gatitos")
-if camara:
-    st.image(camara, caption="Vista en vivo", use_container_width=True)
+# ── SECCION CAMARA / VIDEO ────────────────────────────────────────────────────
+st.markdown('<p class="seccion-titulo">📷 Vista del comedero</p>', unsafe_allow_html=True)
+
+col_vid, col_cam = st.columns([3, 1])
+
+with col_vid:
+    st.markdown(
+        '<div class="tarjeta" style="padding:10px;">'
+        '🎥 <b>Simulacion en vivo</b> — asi se vera cuando tus mininos coman 🐱'
+        '</div>',
+        unsafe_allow_html=True
+    )
+    # Video en loop — sube "gatos.mp4" a tu repo con este nombre
+    st.markdown(
+        '''
+        <div class="video-demo">
+            <video width="100%" autoplay loop muted playsinline
+                   style="display:block;border-radius:16px;">
+                <source src="app/static/gatos.mp4" type="video/mp4">
+                Tu navegador no soporta video.
+            </video>
+        </div>
+        ''',
+        unsafe_allow_html=True
+    )
+
+with col_cam:
+    st.markdown("<br>", unsafe_allow_html=True)
+    if st.button("📸 Abrir\ncamara", use_container_width=True):
+        st.session_state.mostrar_camara = not st.session_state.mostrar_camara
+        st.rerun()
+
+if st.session_state.mostrar_camara:
+    foto = st.camera_input("Toma una foto de tus gatitos")
+    if foto:
+        st.image(foto, caption="Foto capturada", use_container_width=True)
 
 st.markdown("---")
 
